@@ -13,3 +13,5 @@ class Bot:
         ib = IBApi()
 
 bot = Bot()
+
+print("Hello")
