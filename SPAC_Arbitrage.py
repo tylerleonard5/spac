@@ -3,16 +3,17 @@ import csv
 from selectors import SelectorKey
 import datetime as dt
 from datetime import datetime
-import regex
 
 class SPAC:
-    def __init__(self, name=None, date=None, type=None, cap=None, close=None, expr=None):
-        self.name = name
-        self.date = date
-        self.type = type
-        self.cap = cap
+    def __init__(self, symbol=None, symbolIss=None, category=None, exsPrice=None, close=None, closeIss=None, twentyAvg=None, type=None):
+        self.symbol = symbol
+        self.symbolIss = symbolIss
+        self.category = category
+        self.exsPrice = exsPrice
         self.close = close
-        self.expr = expr
+        self.closeIss = closeIss
+        self.twentyAvg = twentyAvg
+        self.type = type
     
 def yearToDay(date):
     date_format = "%m/%d/%Y"
@@ -44,7 +45,7 @@ def yieldToEffective(price):
 
 listofSpac = []
 
-with open('SPAC_Arbitrage.csv', 'r') as csv_file:
+with open('SPAC_ArbitrageExcel.csv', 'r') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter= ',')
     line_count = 0
     for row in csv_reader:
@@ -54,32 +55,37 @@ with open('SPAC_Arbitrage.csv', 'r') as csv_file:
         else:
             for i in range(len(row)):
                 if i == 0:
-                    node.name = row[i]
-                if i == 3:
-                    node.date = row[i]
+                    node.symbol = row[i]
                 if i == 2:
-                    node.type = row[i]
+                    node.category = row[i]
+                if i == 3:
+                    node.exsPrice = float(row[i].replace('$',''))
                 if i == 5:
-                    node.cap = float(row[i].replace('$','').replace(',', '').replace(' ', ''))
+                    node.closeIss = float(row[i].replace('$',''))
+                if i == 4:
+                    node.close = float(row[i].replace('$',''))
                 if i == 7:
-                    node.close = float(row[i])
-                if i == 9:
-                    node.expr = row[i]
-                if i == 6:
-                    if row[i] == "N":
-                        listofSpac.append(node)
+                    node.twentyAvg = float(row[i].replace(',',''))
+                if i == 8:
+                    node.symbolIss = row[i]
+                if i == 10:
+                    node.type = row[i]
+
+            listofSpac.append(node)
 
 for i in listofSpac:
     today = dt.date.today()
     todayStr = str(today.month) +"/" + str(today.day) +"/" + str(today.year)
 
-    print("Symbol: ", i.name)
-    print("Security Type: ", i.type)
-    print("IPO Date: ", i.date)
-    print("Market Cap: ", i.cap)
-    print("Close: ", i.close)
-    print("Expiration Date: ", i.expr)
-    print("Yield to Average: ", yieldToAvg(i.close, todayStr, i.date))
-    print("Yield to Deadline: ", yieldToDeadline(i.close, todayStr, i.expr))
-    print("Yield to Effective: ", yieldToEffective(i.close))
+    print("Symbol: ", i.symbol)
+    print("Issuer Symbol: ", i.symbolIss)
+    print("Category: ", i.category)
+    print("Type: ", i.type)
+    print("Exercise Price: ", i.exsPrice)
+    print("Last Close: ", i.close)
+    print("Issuer Last Close Price: ", i.closeIss)
+    print("20 Day Average: ", i.twentyAvg)
+    #print("Yield to Average: ", yieldToAvg(i.close, todayStr, i.date))
+    #print("Yield to Deadline: ", yieldToDeadline(i.close, todayStr, i.expr))
+    #print("Yield to Effective: ", yieldToEffective(i.close))
     print("\n")
